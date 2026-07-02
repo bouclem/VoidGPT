@@ -22,13 +22,12 @@ from train import get_lr, evaluate, loss_to_ppl, fmt_time
 
 
 VARIANTS = {
-    "standard": {},
-    "rmsnorm": {"use_rmsnorm": True},
-    "swiglu": {"use_swiglu": True},
-    "rope": {"use_rope": True},
-    "rope+swiglu+rmsnorm": {"use_rope": True, "use_swiglu": True, "use_rmsnorm": True},
-    "recursive(3)": {"recursion_steps": 3},
-    "all+recursive(3)": {"use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 3},
+    "d64_l2_rec3": {"d_model": 64, "n_heads": 4, "n_layers": 2, "d_ff": 256, "use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 3},
+    "d96_l1_rec3": {"d_model": 96, "n_heads": 4, "n_layers": 1, "d_ff": 384, "use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 3},
+    "d96_l1_rec3_dff256": {"d_model": 96, "n_heads": 4, "n_layers": 1, "d_ff": 256, "use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 3},
+    "d80_l1_rec3": {"d_model": 80, "n_heads": 4, "n_layers": 1, "d_ff": 320, "use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 3},
+    "d64_l2_rec2": {"d_model": 64, "n_heads": 4, "n_layers": 2, "d_ff": 256, "use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 2},
+    "d64_l2_rec1": {"d_model": 64, "n_heads": 4, "n_layers": 2, "d_ff": 256, "use_rope": True, "use_swiglu": True, "use_rmsnorm": True, "recursion_steps": 1},
 }
 
 

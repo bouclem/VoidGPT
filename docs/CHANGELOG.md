@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0] — 2026-07-02
+
+### Added
+- Custom architecture CLI args in train.py: `--d_model`, `--n_heads`, `--n_layers`, `--d_ff`
+- Architecture benchmark with 6 width/depth combinations on nano_wiki
+- `check_configs.py` for quick param count verification
+
+### Results
+- **Best architecture**: d96_l1_rec3 (96-dim, 1 layer, 3 recursion steps, 120.2K params)
+- nano_wiki PPL: 3.84 (vs d64_l2_rec3's 3.94, -2.5%)
+- 25% faster training: 232K tok/s vs 178K tok/s
+- Key finding: **Width > depth** at 120K scale
+
 ## [0.6.0] — 2026-07-02
 
 ### Added

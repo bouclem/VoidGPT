@@ -251,6 +251,10 @@ def main():
     parser.add_argument("--rmsnorm", action="store_true", help="Use RMSNorm instead of LayerNorm")
     parser.add_argument("--swiglu", action="store_true", help="Use SwiGLU FFN instead of GELU FFN")
     parser.add_argument("--rope", action="store_true", help="Use RoPE positional encoding instead of learned embeddings")
+    parser.add_argument("--d_model", type=int, default=64, help="Model dimension")
+    parser.add_argument("--n_heads", type=int, default=4, help="Number of attention heads")
+    parser.add_argument("--n_layers", type=int, default=2, help="Number of transformer layers")
+    parser.add_argument("--d_ff", type=int, default=256, help="FFN inner dimension")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -280,6 +284,10 @@ def main():
         use_rmsnorm=args.rmsnorm,
         use_swiglu=args.swiglu,
         use_rope=args.rope,
+        d_model=args.d_model,
+        n_heads=args.n_heads,
+        n_layers=args.n_layers,
+        d_ff=args.d_ff,
     )
     model = VoidGPT120K(model_config).to(device)
 
