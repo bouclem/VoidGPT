@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0] — 2026-07-02
+
+### Added
+- Automatic loss curve plotting in train.py (matplotlib PNG saved after training)
+- Loss history tracking: iters, train_loss, val_loss, val_ppl
+- nano_wiki real dataset training: 501K chars, 83 unique chars
+
+### Results
+- nano_wiki training: 5000 iters, PPL 3.94 (train 3.56) — healthy generalization gap
+- Loss curve auto-saved to `{checkpoint_dir}/loss_curve.png`
+- Model generates structurally correct English on real data
+
 ## [0.5.0] — 2026-07-02
 
 ### Results

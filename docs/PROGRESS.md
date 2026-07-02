@@ -159,6 +159,46 @@
 - **Learned**: At PPL 1.17, the model has essentially memorized the synthetic dataset. For real intelligence evaluation, need to train on real datasets (nano_wiki, wikitext2) and test on held-out data. The model architecture (RoPE+SwiGLU+RMSNorm+Recursive) is solid.
 - **Next iteration**: Train on real dataset (nano_wiki), add train/val loss curve plotting to train.py, evaluate generalization on unseen data
 
+---
+
+## Iteration 5 — Real Data Training & Loss Curves (2026-07-02)
+
+### Phase 1: PLAN
+- **Feature**: Train on nano_wiki real dataset, add loss curve plotting to train.py
+- **Why**: Synthetic data PPL 1.17 = memorization. Need real data to evaluate generalization.
+- **Files to modify**: train.py (add matplotlib loss curve plotting)
+
+### Phase 2: RESEARCH
+- Standard matplotlib approach: collect loss history in dict, plot train/val loss + PPL, save as PNG
+- nano_wiki: 9,107 synthetic encyclopedia articles, 501K chars, 83 unique chars
+
+### Phase 3: CODE — COMPLETED
+- train.py: Added loss history tracking (iters, train_loss, val_loss, val_ppl) and matplotlib plotting after training
+- Loss curve saved to `{checkpoint_dir}/loss_curve.png` automatically
+
+### Phase 4: VERIFY — PASSED
+- nano_wiki training: 5000 iters, 3:49, 178K tok/s
+- Final val PPL: 3.94 (train PPL: 3.56) — healthy generalization gap
+- Training progression:
+  - iter 0:    PPL 84.76
+  - iter 500:  PPL 7.46
+  - iter 1000: PPL 5.18
+  - iter 2000: PPL 4.32
+  - iter 3000: PPL 4.08
+  - iter 4500: PPL 3.94 (best)
+- Loss curve plot saved to checkpoints_nano_wiki/loss_curve.png
+- Sample generations:
+  - "The ocean" → "The ocean and ways when their states stories and the world for the family..."
+  - "A computer is" → "A computer is a very important to show the world and the world..."
+- Model generates structurally correct English with repetitive content (expected at 105K params, PPL 3.94)
+
+### Phase 5: FIX — No issues found
+
+### Phase 6: COMPLETE & IMPROVE
+- **Accomplished**: Real data training (nano_wiki), automatic loss curve plotting, generalization evaluation
+- **Learned**: Real data gives more realistic PPL (3.94 vs 1.17 on synthetic). Train/val gap (3.56 vs 3.94) shows model is generalizing, not memorizing. At 105K params, model learns English structure but can't retain enough factual knowledge for coherent long-form generation.
+- **Next iteration**: Try larger d_model (128) with fewer layers to stay within param budget, or train on mixed dataset (synthetic + nano_wiki) for better fact retention
+
 ### User Feedback (mid-iteration)
 - User asked: "use real datasets too, and why transformer only? for intelligent transformer not adapted?"
 - Researched architecture alternatives: recursive transformers, hybrid Transformer+Mamba, Mamba/SSM

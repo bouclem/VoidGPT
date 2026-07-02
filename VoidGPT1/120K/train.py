@@ -91,6 +91,9 @@ def train(
     tokens_seen = 0
     seq_len = train_config.batch_size * 128  # approx tokens per iter
 
+    # Loss history for plotting
+    history = {"iters": [], "train_loss": [], "val_loss": [], "val_ppl": []}
+
     model.train()
 
     print(f"\n{'='*70}")
@@ -159,6 +162,11 @@ def train(
                 f"  └─ {'improved' if val_loss < best_val_loss else 'no improvement'}"
             )
 
+            history["iters"].append(iteration)
+            history["train_loss"].append(train_loss)
+            history["val_loss"].append(val_loss)
+            history["val_ppl"].append(val_ppl)
+
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 torch.save(
@@ -195,6 +203,39 @@ def train(
     print(f"  Total tokens:  {tokens_seen:,}")
     print(f"  Avg speed:     {tokens_seen / max(total_time, 1e-6):,.0f} tok/s")
     print(f"{'='*70}")
+
+    # Save loss curve plot
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+
+        fig, axes = plt.subplots(1, 2, figsize=(12, 4))
+
+        ax = axes[0]
+        ax.plot(history["iters"], history["train_loss"], label="train", alpha=0.8)
+        ax.plot(history["iters"], history["val_loss"], label="val", alpha=0.8)
+        ax.set_xlabel("Iteration")
+        ax.set_ylabel("Loss")
+        ax.set_title("Training & Validation Loss")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        ax = axes[1]
+        ax.plot(history["iters"], history["val_ppl"], label="val PPL", color="steelblue", alpha=0.8)
+        ax.set_xlabel("Iteration")
+        ax.set_ylabel("Perplexity")
+        ax.set_title("Validation Perplexity")
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plot_path = checkpoint_dir / "loss_curve.png"
+        plt.savefig(plot_path, dpi=150)
+        print(f"Loss curve saved to {plot_path}")
+    except ImportError:
+        print("matplotlib not installed, skipping loss curve plot")
+
     return best_val_loss
 
 
