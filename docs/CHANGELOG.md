@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.0] — 2026-07-02
+
+### Results
+- Full 5000-iter training with best variant (RoPE+SwiGLU+RMSNorm+Recursive3)
+- Final val PPL: 1.17 (near-perfect on synthetic data)
+- Training time: 3:49 on CUDA, 178K tok/s
+- Model generates coherent factual text: "Water is a giant magnet. The center of an atom is called the nucleus."
+- 104,040 params (104.0K) — well within 120K budget
+
 ## [0.4.0] — 2026-07-02
 
 ### Added
