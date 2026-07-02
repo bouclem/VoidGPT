@@ -238,6 +238,40 @@
 - **Learned**: Recursive weight reuse with wider base is the optimal strategy. 1 wide layer + 3 recursion steps > 2 narrow layers + 3 recursion steps.
 - **Next iteration**: Train on mixed dataset (synthetic + nano_wiki), try longer training (10000 iters), experiment with learning rate schedule
 
+---
+
+## Iteration 7 — Mixed Dataset Training & Overfitting Analysis (2026-07-02)
+
+### Phase 1: PLAN
+- **Feature**: Train on mixed dataset (synthetic + nano_wiki) for 10000 iters
+- **Why**: Hypothesis: combining structured synthetic facts with real text improves both fact retention and generalization
+- **Files**: data/mixed.txt (via prepare_data.py), no code changes needed
+
+### Phase 2: RESEARCH
+- Data mixing laws paper: simple uniform mixing is surprisingly effective for small models
+- At tiny scale, complex data mixing strategies (RegMix, SampleMix) not worth the overhead
+- Key insight: repeated synthetic data (50×) causes overfitting — need to balance repetition
+
+### Phase 3: CODE — COMPLETED
+- data/mixed.txt: 974K chars, 88 unique chars (472K synthetic + 502K nano_wiki)
+- docs/LESSONS.md: Created cumulative lessons file
+
+### Phase 4: VERIFY — COMPLETED
+- Mixed dataset training: 10000 iters, 4:33, 300K tok/s
+- Best val PPL: 5.46 at iter 6000 (vs pure nano_wiki PPL 3.84)
+- Training plateaued after iter 6000 — overfitting to synthetic data
+- Train PPL 2.18 vs val PPL 5.46 — large generalization gap
+- Sample: "Water is essential for all known for a long the world..."
+- Mixed dataset is WORSE than pure nano_wiki — synthetic repetition causes overfitting
+
+### Phase 5: FIX — N/A (no bugs, just a finding)
+
+### Phase 6: COMPLETE & IMPROVE
+- **Accomplished**: Mixed dataset training, overfitting analysis
+- **Key finding**: Mixing repeated synthetic data with real data HURTS performance. Synthetic data repeated 50× dominates training signal and causes overfitting. Pure nano_wiki (PPL 3.84) > mixed (PPL 5.46).
+- **Learned**: For tiny models, data quality > data quantity. Repeated data is especially harmful. Better approach: use diverse real datasets (nano_wiki + wikitext2) without synthetic repetition.
+- **Next iteration**: Add wikitext2 dataset, research overfitting prevention at small scale (dropout, weight decay, data augmentation), train on diverse real datasets only
+
 ### User Feedback (mid-iteration)
 - User asked: "use real datasets too, and why transformer only? for intelligent transformer not adapted?"
 - Researched architecture alternatives: recursive transformers, hybrid Transformer+Mamba, Mamba/SSM

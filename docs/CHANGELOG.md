@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.0] — 2026-07-02
+
+### Results
+- Mixed dataset (synthetic + nano_wiki) training: 10000 iters, PPL 5.46
+- Key finding: mixed dataset WORSE than pure nano_wiki (PPL 3.84)
+- Synthetic data repeated 50× causes overfitting — train PPL 2.18 vs val PPL 5.46
+- Created docs/LESSONS.md cumulative lessons file
+
 ## [0.7.0] — 2026-07-02
 
 ### Added
