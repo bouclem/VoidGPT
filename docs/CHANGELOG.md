@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0] — 2026-07-02
+
+### Added
+- `benchmark.py`: Architecture variant comparison script (7 variants)
+- Loss curve visualization: 3 matplotlib charts (val loss, val PPL, final comparison)
+- `matplotlib>=3.7.0` to requirements.txt
+- Benchmark results: all+recursive(3) is best variant (PPL 8.83 vs standard 10.84)
+
+### Key Findings
+- RoPE is the single biggest improvement: PPL 10.84→9.42 (-13%)
+- Recursive depth (3 steps) adds another -6% PPL
+- All features combined: -18.5% PPL with 7.6% fewer params (104K vs 112.6K)
+
 ## [0.3.0] — 2026-07-02
 
 ### Added

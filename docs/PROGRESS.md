@@ -83,6 +83,45 @@
 - **Learned**: RoPE saves ~8K params by removing learned positional embeddings. SwiGLU + RoPE + RMSNorm combined gives better PPL with fewer params. Pytest class-based organization works well for feature-grouped tests.
 - **Next iteration**: Longer training run (5000 iters) to evaluate real intelligence, compare architecture variants, add training loss curve visualization
 
+---
+
+## Iteration 3 — Benchmark & Visualization (2026-07-02)
+
+### Phase 1: PLAN
+- **Feature**: Architecture variant benchmark script + loss curve visualization
+- **Why**: Need to empirically determine which architecture combination performs best
+- **Files to create**: benchmark.py
+- **Files to modify**: requirements.txt (add matplotlib), .gitignore
+
+### Phase 2: RESEARCH
+- Matplotlib: standard approach is collect loss history in lists, plot with plt.plot, save with plt.savefig
+- Benchmark pattern: train each variant with same data/hyperparams, compare final val PPL
+
+### Phase 3: CODE — COMPLETED
+- benchmark.py: 7 architecture variants, trains each, plots 3 charts (val loss, val PPL, final comparison bar chart)
+- requirements.txt: Added matplotlib>=3.7.0
+- .gitignore: Updated checkpoint patterns, keep benchmark plots
+
+### Phase 4: VERIFY — PASSED
+- Benchmark ran successfully on CUDA, 7 variants × 500 iters
+- Results:
+  - standard:        112,640 params, PPL 10.84
+  - rmsnorm:         112,320 params, PPL 10.91
+  - swiglu:          112,552 params, PPL 10.87
+  - rope:            104,448 params, PPL  9.42
+  - rope+swiglu+rmsnorm: 104,040 params, PPL  9.38
+  - recursive(3):    112,640 params, PPL 10.81
+  - all+recursive(3): 104,040 params, PPL  8.83 ← BEST
+- Plot saved to benchmark_plot.png (3 charts)
+
+### Phase 5: FIX — No issues found
+
+### Phase 6: COMPLETE & IMPROVE
+- **Accomplished**: Benchmark script with 7 variants, loss curve visualization, empirical evidence that RoPE+SwiGLU+RMSNorm+Recursive is best
+- **Key finding**: RoPE is the single biggest improvement (PPL 10.84→9.42, -13%). Recursive depth adds another -6%. All features combined: -18.5% PPL with 7.6% fewer params.
+- **Learned**: At 120K scale, positional encoding choice matters more than activation function. RoPE's parameter savings + better generalization is a double win.
+- **Next iteration**: Full 5000-iter training run with best variant, generate sample text to evaluate intelligence, add sample generation to benchmark
+
 ### User Feedback (mid-iteration)
 - User asked: "use real datasets too, and why transformer only? for intelligent transformer not adapted?"
 - Researched architecture alternatives: recursive transformers, hybrid Transformer+Mamba, Mamba/SSM

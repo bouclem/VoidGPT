@@ -23,11 +23,16 @@ env/
 # Model checkpoints and data
 checkpoints/
 checkpoints_recursive/
+checkpoints_all/
+checkpoints_test/
 *.pt
 *.pth
 *.bin
 data/train.txt
 data/*.txt
+
+# Benchmark results (keep plots, ignore raw data)
+benchmark_results.json
 
 # Logs
 *.log
