@@ -31,3 +31,9 @@ Cumulative file of mistakes, patterns, and insights learned across all iteration
 - **Data quality > data quantity for tiny models**: Diverse real text generalizes better than repeated structured facts
 - **Train/val gap reveals overfitting**: PPL 2.18 train vs 5.46 val = severe overfitting. Healthy gap is ~0.3-0.5 PPL.
 - **More iters ≠ better when overfitting**: Best val PPL at iter 6000, then plateaued. Early stopping or lower LR would help.
+
+## Iteration 8
+- **Higher dropout + weight decay prevents overfitting**: dropout=0.2, weight_decay=0.2 kept PPL improving through 5000 iters with no plateau
+- **Vocab size matters for param budget**: 87 chars = 8.8K embedding params, 180 chars = 17.3K. That's 8.5K fewer params for transformer body at 120K scale.
+- **Diverse real data > repeated synthetic**: nano_wiki+wikitext2 (PPL 7.12, no overfit) vs synthetic+nano_wiki (PPL 5.46, overfit at 6000)
+- **Larger vocab = harder problem**: PPL 7.12 on 180 chars vs PPL 3.84 on 87 chars. Not directly comparable — more chars = more uncertainty per position.

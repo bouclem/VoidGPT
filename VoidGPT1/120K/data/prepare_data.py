@@ -167,14 +167,37 @@ REAL_DATASETS = {
 }
 
 
+def load_real_mixed(max_chars: int = 500_000) -> str:
+    """Load a mix of real datasets (nano_wiki + wikitext2) for diverse training.
+
+    No synthetic data — pure real text from multiple sources to maximize
+    diversity and reduce overfitting from repetition.
+    """
+    half = max_chars // 2
+    texts = []
+    try:
+        wiki = load_nano_wiki(max_chars=half)
+        texts.append(wiki)
+        print(f"  nano_wiki: {len(wiki)} chars")
+    except Exception as e:
+        print(f"  nano_wiki failed: {e}")
+    try:
+        wt2 = load_wikitext2(max_chars=half)
+        texts.append(wt2)
+        print(f"  wikitext2: {len(wt2)} chars")
+    except Exception as e:
+        print(f"  wikitext2 failed: {e}")
+    return "\n\n".join(texts)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Prepare training data for VoidGPT 1 120K")
     parser.add_argument(
         "--source",
         type=str,
         default="synthetic",
-        choices=["synthetic", "nano_wiki", "wikitext2", "simple_wiki_qa", "mixed"],
-        help="Data source: synthetic, real dataset name, or mixed (synthetic + nano_wiki)",
+        choices=["synthetic", "nano_wiki", "wikitext2", "simple_wiki_qa", "mixed", "real_mixed"],
+        help="Data source: synthetic, real dataset, mixed (synthetic+nano_wiki), or real_mixed (nano_wiki+wikitext2)",
     )
     parser.add_argument("--max_chars", type=int, default=500_000, help="Max chars for real datasets")
     parser.add_argument("--num_repeats", type=int, default=50, help="Repeats for synthetic data")
@@ -197,6 +220,9 @@ def main():
             print(f"Could not load nano_wiki ({e}), using synthetic only")
             text = synthetic
         print(f"Source: mixed (synthetic + nano_wiki)")
+    elif args.source == "real_mixed":
+        text = load_real_mixed(max_chars=args.max_chars)
+        print(f"Source: real_mixed (nano_wiki + wikitext2)")
     else:
         loader = REAL_DATASETS[args.source]
         text = loader(max_chars=args.max_chars)

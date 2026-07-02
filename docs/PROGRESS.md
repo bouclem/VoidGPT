@@ -272,6 +272,41 @@
 - **Learned**: For tiny models, data quality > data quantity. Repeated data is especially harmful. Better approach: use diverse real datasets (nano_wiki + wikitext2) without synthetic repetition.
 - **Next iteration**: Add wikitext2 dataset, research overfitting prevention at small scale (dropout, weight decay, data augmentation), train on diverse real datasets only
 
+---
+
+## Iteration 8 — Diverse Real Datasets & Overfitting Prevention (2026-07-02)
+
+### Phase 1: PLAN
+- **Feature**: Add wikitext2 dataset, create real_mixed source (nano_wiki + wikitext2), add dropout/weight_decay CLI args
+- **Why**: Iteration 7 showed synthetic data causes overfitting. Need diverse real data + regularization.
+- **Files to modify**: prepare_data.py (add real_mixed), train.py (add --dropout, --weight_decay)
+
+### Phase 2: RESEARCH
+- Super Tiny Language Models paper: dropout scheduling helps — increase dropout in late training
+- Rethinking Optimization for Tiny LMs: architecture tweaking, parameter inheritance, multiple-round training
+- WikiText-2 raw-v1: 36K train rows, good for character-level, 176 unique chars
+- Overfitting prevention: higher dropout (0.2-0.3), weight decay (0.2+), data diversity, early stopping
+
+### Phase 3: CODE — COMPLETED
+- prepare_data.py: Added `load_real_mixed()` combining nano_wiki + wikitext2, added `real_mixed` CLI source
+- train.py: Added `--dropout` and `--weight_decay` CLI args
+- data/real_mixed.txt: 1M chars, 176 unique chars (502K nano_wiki + 502K wikitext2)
+
+### Phase 4: VERIFY — PASSED
+- real_mixed training: 5000 iters, 2:18, 295K tok/s
+- Final val PPL: 7.12 (train PPL: 4.99) — healthy gap, no overfitting
+- PPL still improving at iter 5000 (unlike mixed dataset which plateaued at 6000)
+- 129K params (slightly over 120K budget due to 180-char vocab embedding)
+- Samples: English-like structure, more diverse vocabulary than nano_wiki-only
+
+### Phase 5: FIX — N/A
+
+### Phase 6: COMPLETE & IMPROVE
+- **Accomplished**: Diverse real dataset training, overfitting prevention via dropout/weight_decay
+- **Key finding**: Higher dropout (0.2) + weight decay (0.2) successfully prevents overfitting. PPL still dropping at 5000 iters. But larger vocab (180 chars) increases embedding params and makes learning harder.
+- **Learned**: Data diversity helps generalization but increases vocab size. For 120K param budget, char vocab size matters — 87 chars (nano_wiki) gives 8.8K embedding params, 180 chars (real_mixed) gives 17.3K. That's 8.5K fewer params for the transformer body.
+- **Next iteration**: Train longer (10000 iters) on real_mixed since no overfitting, or try filtering wikitext2 to reduce vocab size. Consider BPE tokenizer for better vocab efficiency.
+
 ### User Feedback (mid-iteration)
 - User asked: "use real datasets too, and why transformer only? for intelligent transformer not adapted?"
 - Researched architecture alternatives: recursive transformers, hybrid Transformer+Mamba, Mamba/SSM

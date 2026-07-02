@@ -273,6 +273,8 @@ def main():
     parser.add_argument("--n_heads", type=int, default=4, help="Number of attention heads")
     parser.add_argument("--n_layers", type=int, default=2, help="Number of transformer layers")
     parser.add_argument("--d_ff", type=int, default=256, help="FFN inner dimension")
+    parser.add_argument("--dropout", type=float, default=0.1, help="Dropout rate (increase to 0.2-0.3 to combat overfitting)")
+    parser.add_argument("--weight_decay", type=float, default=0.1, help="Weight decay for AdamW")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -306,6 +308,7 @@ def main():
         n_heads=args.n_heads,
         n_layers=args.n_layers,
         d_ff=args.d_ff,
+        dropout=args.dropout,
     )
     model = VoidGPT120K(model_config).to(device)
 
@@ -322,6 +325,7 @@ def main():
         learning_rate=args.lr,
         checkpoint_dir=args.checkpoint_dir,
         seed=args.seed,
+        weight_decay=args.weight_decay,
     )
 
     best_val_loss = train(

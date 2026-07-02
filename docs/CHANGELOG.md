@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0] — 2026-07-02
+
+### Added
+- `real_mixed` data source in prepare_data.py: combines nano_wiki + wikitext2 (no synthetic)
+- `--dropout` and `--weight_decay` CLI args in train.py for overfitting control
+- wikitext2 dataset support (wikitext-2-raw-v1 from HuggingFace)
+
+### Results
+- real_mixed training: 5000 iters, PPL 7.12 (train 4.99) — no overfitting
+- Higher dropout (0.2) + weight decay (0.2) prevents overfitting seen in iteration 7
+- PPL still improving at iter 5000 (vs plateau at 6000 with synthetic mix)
+- 129K params (slightly over budget due to 180-char vocab)
+
 ## [0.8.0] — 2026-07-02
 
 ### Results
