@@ -3,6 +3,7 @@
 import argparse
 import math
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -83,6 +84,27 @@ def train(
     best_val_loss = float("inf")
     train_iter = iter(train_loader)
 
+    # Async checkpoint saving
+    _save_thread = None
+
+    def async_save_checkpoint(state_dict, path, extra_data):
+        """Save checkpoint in a background thread to avoid blocking training.
+
+        state_dict is captured by reference; the CPU copy happens inside the
+        thread so the main training loop is not stalled by GPU->CPU transfer.
+        """
+        nonlocal _save_thread
+        if _save_thread is not None:
+            _save_thread.join()
+
+        def _save():
+            cpu_state = {k: v.cpu().clone() for k, v in state_dict.items()}
+            data = {**extra_data, "model_state": cpu_state}
+            torch.save(data, path)
+
+        _save_thread = threading.Thread(target=_save, daemon=True)
+        _save_thread.start()
+
     # Real-time tracking
     running_loss = 0.0
     running_loss_count = 0
@@ -150,6 +172,8 @@ def train(
 
         # Full eval with newline
         if iteration % train_config.eval_interval == 0 or iteration == train_config.max_iters - 1:
+            sys.stdout.write("\r  evaluating...          ")
+            sys.stdout.flush()
             val_loss, val_ppl = evaluate(model, val_loader, device, train_config.eval_iters)
             train_loss, train_ppl = evaluate(model, train_loader, device, train_config.eval_iters)
 
@@ -169,28 +193,18 @@ def train(
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
-                torch.save(
-                    {
-                        "model_state": model.state_dict(),
-                        "config": model.config,
-                        "iter": iteration,
-                        "val_loss": val_loss,
-                        "val_ppl": val_ppl,
-                    },
+                async_save_checkpoint(
+                    model.state_dict(),
                     checkpoint_dir / "best_model.pt",
+                    {"config": model.config, "iter": iteration, "val_loss": val_loss, "val_ppl": val_ppl},
                 )
                 print(f"  ★ saved best model (val_loss={val_loss:.4f}, val_ppl={val_ppl:.2f})")
 
         if iteration > 0 and iteration % train_config.checkpoint_interval == 0:
-            torch.save(
-                {
-                    "model_state": model.state_dict(),
-                    "config": model.config,
-                    "iter": iteration,
-                    "val_loss": val_loss,
-                    "val_ppl": val_ppl,
-                },
+            async_save_checkpoint(
+                model.state_dict(),
                 checkpoint_dir / f"checkpoint_{iteration}.pt",
+                {"config": model.config, "iter": iteration, "val_loss": val_loss, "val_ppl": val_ppl},
             )
 
     total_time = time.time() - t_start
@@ -203,6 +217,10 @@ def train(
     print(f"  Total tokens:  {tokens_seen:,}")
     print(f"  Avg speed:     {tokens_seen / max(total_time, 1e-6):,.0f} tok/s")
     print(f"{'='*70}")
+
+    # Wait for any pending checkpoint save to finish
+    if _save_thread is not None:
+        _save_thread.join()
 
     # Save loss curve plot
     try:

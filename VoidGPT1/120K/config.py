@@ -35,7 +35,7 @@ class TrainConfig:
     batch_size: int = 64
     max_iters: int = 5000
     eval_interval: int = 500
-    eval_iters: int = 200
+    eval_iters: int = 25
     learning_rate: float = 3e-4
     min_lr: float = 3e-5
     warmup_iters: int = 200
